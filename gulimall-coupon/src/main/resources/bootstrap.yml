@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: gulimall-coupon
+  cloud:
+    nacos:
+      config:
+        server-addr: 127.0.0.1:8848
+        namespace: gulimall-coupon
+        group: dev
+        #file-extension: yml
+
+        #这个文件不使用，只是示例yml文件中extension-configs配置的格式
+        #方法一
+        extension-configs[0]:
+          data-id: datasource.yml
+          group: dev
+          refresh: true # 配置修改后是否自动更新
+        extension-configs[1]:
+          data-id: mybatis.yml
+          group: dev
+          refresh: true
+        extension-configs[2]:
+          data-id: other.yml
+          group: dev
+          refresh: true
+        #方法二
+#        - data-id: greeting.yml
+#          group: common
+#          refresh: true
+#        - data-id: author.yml
+#          group: common
+#          refresh: true

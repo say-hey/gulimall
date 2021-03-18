@@ -1,0 +1,17 @@
+server:
+  port: 9000
+
+spring:
+  datasource:
+    url: jdbc:mysql://192.168.176.129:3306/gulimall_oms?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: root
+
+mybatis-plus:
+  #classpath*：多一个星代表不止工程的包扫描，其他引用的包也扫描
+  mapper-locations: classpath:/mapper/**/*.xml
+  #主键自增
+  global-config:
+    db-config:
+      id-type: auto

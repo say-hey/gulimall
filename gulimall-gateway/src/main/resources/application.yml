@@ -1,0 +1,80 @@
+server:
+  port: 88
+
+spring:
+  application:
+    name: gulimall-gateway
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+    gateway:
+      routes:
+        # 测试路由
+        - id: test_route
+          #uri:需要跳转的地址
+          uri: https://www.baidu.com
+          #断言
+          predicates:
+            #url查询，当请求中有url参数等于baidu，则通过，跳转到上面uri
+            - Query=url,baidu
+
+        # 库存服务路由
+        - id: ware_route
+          uri: lb://gulimall-ware
+          predicates:
+            - Path=/api/ware/**
+          filters:
+            # gulimall-ware是没有api请求的，所以需要去掉，其他保留
+            - RewritePath=/api/(?<segment>/?.*), /$\{segment}
+
+        # 会员服务路由
+        - id: mermber_route
+          uri: lb://gulimall-member
+          predicates:
+            - Path=/api/member/**
+          filters:
+            # gulimall-mermber是没有api请求的，所以需要去掉，其他保留
+            - RewritePath=/api/(?<segment>/?.*), /$\{segment}
+
+        # 商品服务路由
+        - id: product_route
+          uri: lb://gulimall-product
+          predicates:
+            - Path=/api/product/**
+          filters:
+            # 前端发过来的地址还是带了api，但是gulimall-product中没有api，所以要重写
+            # 真正地址 http://localhost:10000/product/category/list/tree
+            - RewritePath=/api/(?<segment>/?.*), /$\{segment}
+
+        # renrne-fast-vue路由，将所有前端请求发送给renrne-fast，放在最后
+        - id: admin_route
+          # lb:负载均衡
+          uri: lb://renren-fast
+          # 断言
+          predicates:
+            # 将路径中带有api的请求发送给上面的uri路径中
+            - Path=/api/**
+          filters:
+            # 路径重写，正则表达式，去掉api，加上项目名
+            - RewritePath=/api/(?<segment>/?.*), /renren-fast/$\{segment}
+# 添加一个规定，在renren-fast-vue项目中将基准请求url添加api标识前端请求
+#  目前如下
+#  http://localhost:88/api/captcha.jpg?uuid=0ff8a141-377f-4110-833b-3aaad681f53a
+#  正确如下
+#  http://localhost:8080/renren-fast/captcha.jpg?uuid=25c6d8ec-01a9-4f73-8ee7-2c0975fe2c98
+# 使用filter路径重写，去掉api，加上项目名，指向正确地址
+
+        # nginx首页网关
+        - id: gulimall_host_route
+          uri: lb://gulimall-product
+          predicates:
+            #　断言
+            - Host=gulimall.com
+
+        # search网关
+        - id: gulimall_search_route
+          uri: lb://gulimall-search
+          predicates:
+            #　断言
+            - Host=search.gulimall.com
